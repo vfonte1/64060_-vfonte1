@@ -1,11 +1,10 @@
 ---
 title: "Assigment 1"
-Author: Vincent Fonte
-Source:ISlr Source
-This dataset was taken from the StatLib library which is maintained at Carnegie Mellon University. The dataset was used in the 1983 American Statistical Association Exposition.
+author: "Vincent Fonte"
+source: "ISLR This data set was taken from the StatLib library which is maintained at Carnegie Mellon University. The dataset was used in the 1983 American Statistical Association Exposition."
 
 
-output: HTML
+output: html_document
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
@@ -23,13 +22,13 @@ The preview shows you a rendered HTML copy of the contents of the editor. Conseq
 ```{r}
 library(ISLR)
 data("Auto")
-print(summary(Auto))
+(summary(Auto))
 
 #quantitative printed
 ```
 ```{r}
-summary(Auto$horsepower)
-summary(Auto$mpg)
+print(summary(Auto$horsepower))
+print(summary(Auto$mpg))
 
 ```
 #Categorical variable printed
