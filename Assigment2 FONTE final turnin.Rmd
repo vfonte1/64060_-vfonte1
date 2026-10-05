@@ -1,0 +1,155 @@
+---
+title: "Assigment_2-knn"
+output: html_document
+date: "2026-10-05"
+Author: "Vincent Fonte"
+---
+
+#Question 1 SPlitting the data 60/40
+```{r}
+library(caret)
+library(class)
+UniversalBank<-read.csv("UniversalBank.csv")
+```
+```{r}
+
+UniversalBank$Education_1<-ifelse(UniversalBank$Education ==1,1,0)
+ UniversalBank$Education_2<-ifelse(UniversalBank$Education ==2,1,0)
+ UniversalBank$Education_3<-ifelse(UniversalBank$Education ==3,1,0)
+ 
+bank_model<-subset(UniversalBank, select =-c(ID, ZIP.Code, Education))
+X<- subset(bank_model, select = -Personal.Loan)
+y <- bank_model$Personal.Loan
+
+table(y)
+
+```
+
+```{r}
+set.seed(43)
+train_index<- sample(1:nrow(X),size = .60 * nrow(X))
+ X_train<-X[train_index, ]
+ y_train<-y[train_index]
+  y_valid<-y[-train_index]
+X_valid<- X[-train_index, ]
+nrow(X_train)
+nrow(X_valid)
+length(y_train)
+length(y_valid)
+```
+
+```{r}
+preprocess <- preProcess(X_train, method =c("center", "scale"))
+X_train_scaled<- predict(preprocess, X_train)
+ X_valid_scaled<-predict(preprocess, X_valid)
+```
+```{r}
+set.seed(43)
+knn_1<-knn(train =X_train_scaled, test = X_valid_scaled, cl = y_train, k=1,prob=TRUE)
+confusion_matrix_1<-table(
+  predicted=knn_1,
+  Actual=y_valid
+  )
+confusion_matrix_1
+accuracy_1<- mean(knn_1 == y_valid)
+accuracy_1
+```
+#Question 1 this custmer would be valdited as k=0 meaning the customer rejects the loan
+
+
+# question 2 comparing different values of k=3,5,7,9
+
+```{r}
+ knn_3<- knn(train = X_train_scaled, test = X_valid_scaled,cl = y_train, k=3)
+
+knn_5<- knn(train = X_train_scaled, test = X_valid_scaled,cl = y_train, k=5)
+knn_7<- knn(train = X_train_scaled, test = X_valid_scaled,cl = y_train, k=7)
+
+knn_9<- knn(train = X_train_scaled, test = X_valid_scaled,cl = y_train, k=9)
+accuracy_3<-mean(knn_3==y_valid)
+accuracy_5<-mean(knn_5==y_valid)
+accuracy_7<-mean(knn_7==y_valid)
+accuracy_9<-mean(knn_9==y_valid)
+
+accuracy_3
+accuracy_5
+accuracy_7
+accuracy_9
+
+
+```
+
+#Question 2:anwser Value of K 3 has the highest accuracy of .9630 this allows to not be overfitting or completely ignore data that can help us to predict
+
+```{r}
+confusion_matrix3<-table(predi=knn_3,Actual = y_valid)
+confusion_matrix3
+```
+#anwser for 3 see chart above
+
+```{r}
+new_customer<- data.frame(Age=40, Experience=10, Income=84, Family=2, CCAvg=2, Education_1=0, Education_2=1, Education_3=0, Mortgage=0, Securities.Account=0, CD.Account=0, Online=1, CreditCard=1)
+
+new_customer<-predict(preprocess, new_customer)
+prediction <- knn(train = X_train_scaled, test = new_customer,cl = y_train, k=3)
+prediction
+```
+#question 4 customer code is 0 this tells us that the customers will not accept the loan
+```{r}
+set.seed(43)
+train_index_50<- sample(1:nrow(X), size= .50*nrow(X))
+remaining_index<-setdiff(1:nrow(X), train_index_50)
+valid_index30<- sample(remaining_index, size = .60 * length(remaining_index))
+test_index20<-setdiff(remaining_index, valid_index30)
+
+X_train_50<-X[train_index_50, ]
+ y_train_50<-y[train_index_50]
+ 
+ X_valid_30<- X[valid_index30, ]
+ y_valid_30<- y[valid_index30]
+ X_test_20<- X[test_index20, ]
+ y_test_20<- y[test_index20]
+ 
+ nrow(X_train_50)
+ nrow(X_valid_30)
+ nrow(X_test_20)
+```
+#question5 anwser
+
+```{r}
+preprocess_50<- preProcess(X_train_50, method =c("center", "scale"))
+ X_train_50_scaled<- predict(preprocess_50, X_train_50)
+X_valid_30_scaled<-predict(preprocess_50, X_valid_30)
+X_test_20_scaled<-predict(preprocess_50, X_test_20)
+
+
+```
+
+```{r}
+knn_train_50<- knn(train = X_train_50_scaled, test = X_train_50_scaled,cl = y_train_50, k=3)
+confusion_train50<-table(predicted=knn_train_50,Actual=y_train_50)
+confusion_train50
+
+```
+```{r}
+accuracy_train50<-mean(knn_train_50==y_train_50)
+accuracy_train50
+```
+
+
+```{r}
+knn_valid_30<-knn(train=X_train_50_scaled,test=X_valid_30_scaled,cl=y_train_50,k=3)
+confusion_val_30<-table(predicted=knn_valid_30,Actual=y_valid_30)
+confusion_val_30
+accuracy_val_30<-mean(knn_valid_30==y_valid_30)
+accuracy_val_30
+```
+```{r}
+knn_test_20<-knn(train=X_train_50_scaled,test=X_test_20_scaled,cl=y_train_50,k=3)
+confusion_test_20<-table(predicted=knn_test_20,Actual=y_test_20)
+confusion_test_20
+accuracy_test_20<-mean(knn_test_20==y_test_20)
+accuracy_test_20
+```
+#5 anwsers
+
