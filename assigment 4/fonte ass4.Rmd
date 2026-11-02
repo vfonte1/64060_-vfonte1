@@ -1,0 +1,77 @@
+---
+title: "Assigment 4"
+author: "Vincent Fonte"
+date: "2026-11-02"
+output: html_document
+---
+
+```{r}
+pharma<-read.csv("Pharmaceuticals.csv")
+ row.names(pharma)<-pharma$Symbol
+num<- pharma[, 3:11]
+str(num)
+```
+```{r}
+library(cluster)
+z <- scale(num)
+round(apply(z, 2, sd), 2)
+```
+#a. k means gets its data by distance so any large numbers would causle an outlier. I made everything have an equal variable whieght so that nothing cause z scores or k- means to cause a skew in the data.
+```{r}
+
+set.seed(1)
+clustersum <-sapply(1:7, function(k) kmeans(z, centers = k, nstart=50)$tot.withinss)
+plot(1:7, clustersum, type ="b", pch = 19,
+     xlab = "# of clusters", ylab ="total inside cluste ", 
+     main= "Elbow plot")
+```
+```{r}
+d <- dist(z)
+set.seed(1)
+avg<- sapply(2:7, function(k){
+  Kmen<- kmeans(z, centers = k,nstart =51)
+  mean(silhouette(Kmen$cluster, d)[, "sil_width"])
+})
+```
+# THe plot shows a downward slop that is conststent across. it shows a decrease as you increase clustes.
+
+```{r}
+plot(2:7, avg, type ="b", pch = 19,
+xlab="k", ylab ="Avg silh width", main ="silh")
+round(avg,3)
+```
+# for k I choose 3 because it had the highest average shiloute score
+
+```{r}
+set.seed(1)
+kMS<- kmeans(z, centers = 3, nstart =51)
+kMS$size
+pharma$Cluster<- kMS$cluster
+split(rownames(pharma),pharma$Cluster)
+```
+```{r}
+profile <-aggregate(num, by = list(Cluster = kMS$cluster), FUN = mean)
+round(profile, 2)
+round(kMS$centers, 2)
+```
+#bCLuster 1 market cap in the middle at 21.75  pe is the largest at 46.9. roe and roa are low. CLuster 2 has the larget cap at 97.1 The higest roe and roa and net profit of 20. THis company seems to be the most profitable
+# cluster 3 is the middle it has the smallest market cap  and highest beta scor this apperas to be a small biz.
+
+```{r}
+matplot(t(kMS$centers), type = "l", lty= 1, lwd =2, col = 1:3, xaxt ="n",
+        ylab = "STD mean", main = "profiles of cluster")
+axis(1, at = 1:9, labels = colnames(num), las =2, cex.axis =.6)
+legend("topright", legend = paste("Cluster", 1:3), col =1:4, lty =1, lwd =2)
+       abline(h=0, lty = 2)
+```
+```{r}
+table(pharma$Cluster, pharma$Median_Recommendation)
+table(pharma$Cluster , pharma$Location)
+table(pharma$Cluster, pharma$Exchange)
+```
+#c  cluster 1 in cluse canda,germant uk and us. Cluster 2 had the most state side at 8, and Switz and Uk. Cluster 3 had france, ireland and us. Cluster 1 and 2 had all NYSE stocks. CLsuter 3 was more ddiverse at amex and nasdaq and NYSE.This shows that accross the board things can change depending on comapnies outlooks
+
+# D cluster names cluster one is companies that cost alot- the withb. highest p/e score
+#2 high profitable companies big companies that make a lopt of money
+#3 Small companies with potetial for quick growth across the board due to high grow rev score.
+# to conclude we put 21 pharms into 3 clusters based on differnt sizes profits and growth margins and more,
